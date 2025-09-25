@@ -105,6 +105,25 @@
             margin-top: 15px;
         }
 
+        .signature-wrap {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .signature-label {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .signature-img {
+            width: 180px;
+            height: auto;
+            object-fit: contain;
+        }
+
         .buttons {
             text-align: center;
             padding: 20px;
@@ -163,6 +182,13 @@
             text-align: center;
         }
 
+        .payslip-header .logo-print {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
         .payslip-content {
             padding: 30px;
         }
@@ -185,33 +211,48 @@
 
         .payslip-label {
             font-weight: bold;
-            color: #2c3e50;
+            color: #000000;
         }
 
         .payslip-value {
-            color: #27ae60;
+            color: #000000;
             font-weight: bold;
+        }
+
+        .confidential {
+            margin-top: 24px;
+            text-align: center;
+            font-weight: bold;
+            color: #b00;
+            letter-spacing: 0.5px;
         }
 
         @media print {
             body {
                 background: white;
                 padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
-            
-            .form-section, .buttons {
-                display: none;
+            /* Hide the app header and UI so only the payslip prints */
+            .header,
+            .form-section,
+            .buttons {
+                display: none !important;
             }
-            
             .container {
                 box-shadow: none;
                 border-radius: 0;
+                border: none;
             }
-            
             .payslip-output {
                 display: block !important;
                 margin-top: 0;
                 border: none;
+            }
+            @page {
+                size: A4;
+                margin: 12mm;
             }
         }
 
@@ -223,9 +264,11 @@
             text-align: center;
             margin-bottom: 20px;
             font-style: italic;
-            color: #7f8c8d;
+            color: #000000;
         }
     </style>
+    <link rel="prefetch" href="Logo.png" as="image">
+    <link rel="prefetch" href="Signature.png" as="image">
 </head>
 <body>
     <div class="container">
@@ -314,6 +357,7 @@
 
         <div class="payslip-output" id="payslipOutput">
             <div class="payslip-header">
+                <img src="Logo.png" alt="School Logo" class="logo-print" id="logoImg">
                 <div class="school-name">QUANG TRUNG SECONDARY SCHOOL</div>
                 <div class="payslip-title">EMPLOYEE PAYSLIP</div>
                 <div class="date-info" id="payslipDate"></div>
@@ -347,6 +391,11 @@
                     <span class="payslip-label">TOTAL SALARY:</span>
                     <span class="payslip-value" id="displayTotalSalary"></span>
                 </div>
+                <div class="signature-wrap">
+                    <div class="signature-label">Authorized Signature</div>
+                    <img src="Signature.png" alt="Signature" class="signature-img" id="signatureImg">
+                </div>
+                <div class="confidential" id="confidentialFooter">Confidential Document</div>
             </div>
         </div>
     </div>
@@ -367,7 +416,6 @@
             const baseSalary = parseFloat(document.getElementById('baseSalary').value) || 0;
             const bonus = parseFloat(document.getElementById('bonus').value) || 0;
             const total = baseSalary + bonus;
-            
             document.getElementById('totalDisplay').textContent = formatCurrency(total);
             return total;
         }
@@ -414,17 +462,75 @@
             document.getElementById('payslipOutput').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Export to PDF
+        // Export to PDF: open a clean print window containing only the payslip
         function exportToPDF() {
             const payslipOutput = document.getElementById('payslipOutput');
-            
             if (payslipOutput.style.display === 'none') {
                 alert('Please generate a payslip first before exporting to PDF.');
                 return;
             }
 
-            // Use browser's print functionality to save as PDF
-            window.print();
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                window.print();
+                return;
+            }
+
+            const doc = printWindow.document;
+            const styles = `
+                <style>
+                    * { box-sizing: border-box; }
+                    body { font-family: Arial, sans-serif; margin: 0; }
+                    .payslip-output { border: none; }
+                    .payslip-header { background-color: #2c3e50; color: #fff; padding: 20px; text-align: center; }
+                    .payslip-header .logo-print { width: 96px; height: 96px; object-fit: contain; margin-bottom: 10px; }
+                    .payslip-content { padding: 30px; }
+                    .payslip-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+                    .payslip-row:last-child { border-bottom: none; font-weight: bold; font-size: 18px; background-color: #f8f9fa; padding: 15px; margin-top: 10px; }
+                    .payslip-label { font-weight: bold; color: #2c3e50; }
+                    .payslip-label { color: #000000; }
+                    .payslip-value { color: #000000; font-weight: bold; }
+                    .date-info { color: #000000; }
+                    .signature-wrap { margin-top: 18px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+                    .signature-label { font-size: 12px; color: #555; }
+                    .signature-img { width: 180px; height: auto; object-fit: contain; }
+                    .confidential { margin-top: 24px; text-align: center; font-weight: bold; color: #b00; letter-spacing: 0.5px; }
+                    @page { size: A4; margin: 12mm; }
+                    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+                </style>
+            `;
+
+            doc.open();
+            doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Payslip</title>' + styles + '</head><body>');
+            doc.write(payslipOutput.outerHTML);
+            doc.write('</body></html>');
+            doc.close();
+
+            // Wait for images to load before printing
+            const onReady = () => {
+                printWindow.focus();
+                printWindow.print();
+                // Optionally close the window after printing
+                printWindow.close();
+            };
+
+            const imgs = Array.from(doc.images || []);
+            if (imgs.length === 0) {
+                onReady();
+            } else {
+                let loaded = 0;
+                imgs.forEach(img => {
+                    if (img.complete) {
+                        loaded += 1;
+                        if (loaded === imgs.length) onReady();
+                    } else {
+                        img.onload = img.onerror = () => {
+                            loaded += 1;
+                            if (loaded === imgs.length) onReady();
+                        };
+                    }
+                });
+            }
         }
 
         // Clear form
@@ -435,7 +541,6 @@
             document.getElementById('facultyCode').value = '';
             document.getElementById('baseSalary').value = '';
             document.getElementById('bonus').value = '0';
-            
             document.getElementById('payslipOutput').style.display = 'none';
             calculateTotal();
         }
@@ -445,3 +550,5 @@
     </script>
 </body>
 </html>
+
+
