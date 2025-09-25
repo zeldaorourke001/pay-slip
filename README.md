@@ -1,5 +1,13 @@
-Features:
-✅ Professional Design - Clean, modern interface with school branding ✅ All Required Fields - Full Name, Position, Subject, Faculty Code, Salary, Bonus, Total Salary ✅ Vietnamese Currency Format - Automatically formats numbers with Vietnamese locale ✅ PDF Export - Uses browser's print function to save as PDF ✅ Monthly Selection - Choose month and year for payslip ✅ Auto-calculation - Total salary automatically updates ✅ Responsive Design - Works on desktop and mobile ✅ Print-friendly - Form elements hidden when printing ✅ Local Usage - No internet required, runs locally
+**Features:**
+✅ Professional Design - Clean, modern interface with school branding 
+✅ All Required Fields - Full Name, Position, Subject, Faculty Code, Salary, Bonus, Total Salary 
+✅ Vietnamese Currency Format - Automatically formats numbers with Vietnamese locale 
+✅ PDF Export - Uses browser's print function to save as PDF 
+✅ Monthly Selection - Choose month and year for payslip 
+✅ Auto-calculation - Total salary automatically updates 
+✅ Responsive Design - Works on desktop and mobile 
+✅ Print-friendly - Form elements hidden when printing 
+✅ Local Usage - No internet required, runs locally
 
 PDF Export Instructions:
 When you click "Export to PDF":
